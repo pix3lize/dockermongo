@@ -1,0 +1,109 @@
+version: "3.5"
+
+services:
+
+  mongo-server1:
+    image: mongo
+    container_name: mongoserver1
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo1_db:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  mongo-server2:
+    image: mongo
+    container_name: mongoserver2
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo2_db:/data/db
+    ports:
+      - 27018:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example      
+  mongo-server3:
+    image: mongo
+    container_name: mongoserver3
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo3_db:/data/db
+    ports:
+      - 27019:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  mongo-server4:
+    image: mongo
+    container_name: mongoserver4
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo4_db:/data/db
+    ports:
+      - 27020:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  mongo-server5:
+    image: mongo
+    container_name: mongoserver5
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo5_db:/data/db
+    ports:
+      - 27021:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  mongo-server6:
+    image: mongo
+    container_name: mongoserver6
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo6_db:/data/db
+    ports:
+      - 27022:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  ubuntu:
+    image: pix3lize/mdbubuntu
+    container_name: ubuntu
+    working_dir: /home/mdb
+    volumes:
+      - ./init-replica.sh:/home/mdb/init-replica.sh
+    entrypoint: ["/bin/bash", "-c"]
+    command: 
+      - |
+        chmod +x /home/mdb/init-replica.sh
+        bash /home/mdb/init-replica.sh
+        tail -f /dev/null
+    depends_on:
+      - mongo-server1
+      - mongo-server2
+      - mongo-server3
+      - mongo-server4
+      - mongo-server5
+      - mongo-server6
+
+volumes:
+  mongo1_db:
+  mongo2_db:
+  mongo3_db:
+  mongo4_db:
+  mongo5_db:
+  mongo6_db:

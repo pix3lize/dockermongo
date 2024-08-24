@@ -1,0 +1,52 @@
+# Use an official Ubuntu as the base image
+FROM ubuntu:latest
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update the package list and install any packages you need
+RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get install -y \
+    curl \
+    gnupg \
+    wget \
+    vim \
+    git \
+    net-tools \
+    sudo
+
+# Install MongoDB Shell (mongosh)
+RUN wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-7.0.asc && \
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+    apt-get update && \
+    apt-get install -y mongodb-mongosh
+
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs
+
+# Clean up
+# Add a new user (optional)
+RUN useradd -ms /bin/bash mdb && \
+    echo 'mdb:mdb123' | chpasswd && \
+    adduser mdb sudo
+
+# Create a development directory
+RUN mkdir development
+
+# Set the working directory to the development directory
+WORKDIR /home/mdb/development
+
+# COPY package.json and writeall.js to the working directory
+COPY writeall.js .
+COPY package.json .
+
+# Run npm init
+RUN npm init -y
+
+# Run npm install
+RUN npm install
+
+# This command keeps the container running
+CMD ["tail", "-f", "/dev/null"]

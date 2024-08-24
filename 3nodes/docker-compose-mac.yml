@@ -1,0 +1,64 @@
+version: "3.5"
+
+services:
+
+  mongo-server1:
+    image: mongo
+    container_name: mongoserverx1
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo1_db:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  mongo-server2:
+    image: mongo
+    container_name: mongoserverx2
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo2_db:/data/db
+    ports:
+      - 27018:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example      
+  mongo-server3:
+    image: mongo
+    container_name: mongoserverx3
+    command: mongod --replSet mongo-replica --bind_ip_all --port 27017 --dbpath /data/db --keyFile /data/replica.key
+    volumes:
+      - $PWD/mongodb-keyfile:/data/replica.key
+      - mongo3_db:/data/db
+    ports:
+      - 27019:27017
+    environment:
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  ubuntu:
+    image: pix3lize/mdbubuntu
+    container_name: ubuntu
+    working_dir: /home/mdb
+    volumes:
+      - ./init-replica.sh:/home/mdb/init-replica.sh
+    entrypoint: ["/bin/bash", "-c"]
+    command: 
+      - |
+        chmod +x /home/mdb/init-replica.sh
+        bash /home/mdb/init-replica.sh
+        tail -f /dev/null
+    depends_on:
+      - mongo-server1
+      - mongo-server2
+      - mongo-server3
+
+volumes:
+  mongo1_db:
+  mongo2_db:
+  mongo3_db:
