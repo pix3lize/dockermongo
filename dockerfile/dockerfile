@@ -14,15 +14,17 @@ RUN apt-get install -y \
     vim \
     git \
     net-tools \
-    sudo
+    sudo \
+    iputils-ping \
+    dnsutils 
 
 # Install MongoDB Shell (mongosh)
-RUN wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-7.0.asc && \
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+RUN wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | sudo tee /etc/apt/trusted.gpg.d/server-8.0.asc && \
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list && \
     apt-get update && \
     apt-get install -y mongodb-mongosh
 
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh && \
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x -o nodesource_setup.sh && \
     bash nodesource_setup.sh && \
     apt-get install -y nodejs
 
@@ -35,12 +37,25 @@ RUN useradd -ms /bin/bash mdb && \
 # Create a development directory
 RUN mkdir development
 
-# Set the working directory to the development directory
+RUN apt-get install -y \
+    iproute2
+
+# Set base working directory
+WORKDIR /home/mdb/
+
+# Copy mongod and mongotop to /home/mdb/
+COPY mongod .
+COPY mongotop .
+
+# Change working directory to development
 WORKDIR /home/mdb/development
 
-# COPY package.json and writeall.js to the working directory
-COPY writeall.js .
-COPY package.json .
+# Copy mongostat to development
+COPY mongostat .
+COPY dev/ /home/mdb/development/
+
+# Optional: Add execution permissions if needed
+RUN chmod +x /home/mdb/mongod /home/mdb/mongotop /home/mdb/development/mongostat
 
 # Run npm init
 RUN npm init -y
